@@ -321,7 +321,18 @@ const luckysheetformula = {
             sheetmanage.changeSheetExec(_this.rangetosheet);
         }
     },
-    fucntionboxshow: function (r, c) {
+    xssDeal: function(str) {
+        if (typeof str !== 'string') return str;
+        return str.replace(/<script>/g, '&lt;script&gt;').replace(/<\/script>/, '&lt;/script&gt;');
+    },
+    ltGtSignDeal: function (str) {
+        if (typeof str !== 'string') return str;
+        if (str.substr(0, 5) === "<span" || str.startsWith('=')) {
+            return str
+        }
+        return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    },
+    fucntionboxshow: function(r, c) {
 
         if (!checkProtectionCellHidden(r, c, Store.currentSheetIndex)) {
             $("#luckysheet-functionbox-cell").html("");
@@ -346,7 +357,7 @@ const luckysheetformula = {
                 value = valueShowEs(r, c, d);
             }
         }
-
+        value = this.xssDeal(value);
         _this.oldvalue = value;
         $("#luckysheet-functionbox-cell").html(value);
     },
@@ -1558,7 +1569,9 @@ const luckysheetformula = {
             cfg["rowlen"] = {};
         }
 
-        if ((d[r][c].tb == "2" && d[r][c].v != null) || isInlineStringCell(d[r][c])) {//自动换行
+        // 单元格行高自适应,只有在单元格不是合并单元格时才能生效
+        if ((d[r][c].tb == "2" && d[r][c].v != null) || isInlineStringCell(d[r][c]) && (typeof d[r][c]['mc'] == 'undefined')) {
+            //自动换行
             let defaultrowlen = Store.defaultrowlen;
 
             let canvas = $("#luckysheetTableContent").get(0).getContext("2d");
@@ -3331,11 +3344,11 @@ const luckysheetformula = {
             $editer = $input;
         let value1 = $editer.html(),
             value1txt = $editer.text();
-
-        setTimeout(function () {
+        let xssDeal = this.xssDeal
+        setTimeout(function() {
             let value = $editer.text(),
                 valuetxt = value;
-
+            value = xssDeal(value);
             if (value.length > 0 && value.substr(0, 1) == "=" && (kcode != 229 || value.length == 1)) {
                 value = _this.functionHTMLGenerate(value);
                 value1 = _this.functionHTMLGenerate(value1txt);
@@ -3401,10 +3414,12 @@ const luckysheetformula = {
 
                     }
                     else {
+                        value = _this.ltGtSignDeal(value);
                         $copy.html(value);
                     }
                 }
                 else {
+                    value = _this.ltGtSignDeal(value);
                     $copy.html(value);
                 }
             }

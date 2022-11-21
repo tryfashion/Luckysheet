@@ -352,7 +352,7 @@ export function getFontStyleByCell(cell,checksAF,checksCF, isCheck=true){
             style += "font-family: " + f + ";";
         }
 
-        if(key == "fs" && value != "10"){
+        if(key == "fs"){
             style += "font-size: "+ value + "pt;";
         }
 
@@ -370,18 +370,6 @@ export function getFontStyleByCell(cell,checksAF,checksCF, isCheck=true){
 
         if(key == "cl" && value != "0"){
             style += "text-decoration: line-through;";
-        }
-
-        if(key == "un" && (value == "1" || value == "3")){
-            let color = cell["_color"];
-            if(color==null){
-                color = cell["fc"];
-            }
-            let fs = cell["_fontSize"];
-            if(fs==null){
-                fs = cell["fs"];
-            }
-            style += "border-bottom: "+ Math.floor(fs/9) +"px solid "+ color +";";
         }
 
     }
@@ -521,12 +509,12 @@ export function checkstatusByCell(cell, a){
     }
     else if(a == "fs"){
         if(foucsStatus == null){
-            foucsStatus = "10";
+            foucsStatus = String(Store.defaultFontSize);
         }
         else{
             foucsStatus = foucsStatus[a];
             if(foucsStatus == null){
-                foucsStatus = "10";
+                foucsStatus = String(Store.defaultFontSize);
             }
         }
     }

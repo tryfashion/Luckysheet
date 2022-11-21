@@ -2,6 +2,7 @@
 import defaultSetting from './config.js';
 import { common_extend } from './utils/util';
 import Store from './store';
+import { locales } from './locale/locale';
 import server from './controllers/server';
 import luckysheetConfigsetting from './controllers/luckysheetConfigsetting';
 import sheetmanage from './controllers/sheetmanage';
@@ -38,6 +39,8 @@ import * as api from './global/api';
 import flatpickr from 'flatpickr'
 import Mandarin from 'flatpickr/dist/l10n/zh.js'
 import { initListener } from './controllers/listener';
+import { hideloading, showloading } from './global/loading.js';
+import { luckysheetextendData } from './global/extend.js';
 
 let luckysheet = {};
 
@@ -114,6 +117,7 @@ luckysheet.create = function (setting) {
     luckysheetConfigsetting.showConfigWindowResize = extendsetting.showConfigWindowResize;
     luckysheetConfigsetting.enableAddRow = extendsetting.enableAddRow;
     luckysheetConfigsetting.enableAddBackTop = extendsetting.enableAddBackTop;
+    luckysheetConfigsetting.addRowCount = extendsetting.addRowCount;
     luckysheetConfigsetting.enablePage = extendsetting.enablePage;
     luckysheetConfigsetting.pageInfo = extendsetting.pageInfo;
 
@@ -121,6 +125,8 @@ luckysheet.create = function (setting) {
     luckysheetConfigsetting.beforeCreateDom = extendsetting.beforeCreateDom;
     luckysheetConfigsetting.workbookCreateBefore = extendsetting.workbookCreateBefore;
     luckysheetConfigsetting.workbookCreateAfter = extendsetting.workbookCreateAfter;
+    luckysheetConfigsetting.remoteFunction = extendsetting.remoteFunction;
+    luckysheetConfigsetting.customFunctions = extendsetting.customFunctions;
 
     luckysheetConfigsetting.fireMousedown = extendsetting.fireMousedown;
     luckysheetConfigsetting.forceCalculation = extendsetting.forceCalculation;
@@ -146,12 +152,12 @@ luckysheet.create = function (setting) {
 
     // Store the currently used plugins for monitoring asynchronous loading
     Store.asyncLoad.push(...luckysheetConfigsetting.plugins);
-    
+
     // Register plugins
     initPlugins(extendsetting.plugins , extendsetting.data);
 
     // Store formula information, including internationalization
-    functionlist();
+    functionlist(extendsetting.customFunctions);
 
     let devicePixelRatio = extendsetting.devicePixelRatio;
     if(devicePixelRatio == null){
@@ -244,6 +250,12 @@ luckysheet.selectHightlightShow = selectHightlightShow;
 
 // Reset parameters after destroying the table
 luckysheet.destroy = method.destroy;
+
+luckysheet.showLoadingProgress = showloading;
+luckysheet.hideLoadingProgress = hideloading;
+luckysheet.luckysheetextendData = luckysheetextendData;
+
+luckysheet.locales = locales;
 
 export {
     luckysheet

@@ -2,30 +2,19 @@
 
 ![logo](/docs/.vuepress/public/img/logo_text.png)
 
-
 </div>
+
+# Luckysheet 3.x 目前正在使用Typescript重构
 
 简体中文 | [English](./README.md)
 
 ## 介绍
 🚀Luckysheet ，一款纯前端类似excel的在线表格，功能强大、配置简单、完全开源。
 
-## 招聘
-字节跳动靠谱内推 - 前端工程师（上海 · 飞书）
-30 – 60K · 15薪
-1. 简历优先筛选
-2. 面试过程及时跟进
-3. 凭实力说话，薪资在行业有很强竞争力
-4. 包三餐和下午茶
-5. 有意向可以先咨询
-6. 框架: React、Electron
-
-<img src="https://minio.cnbabylon.com/public/luckysheet/feishu_jd.jpg" width = "250" alt="微信群" align="center" />
-
 ## 相关链接
  | 源码   | 文档 | Demo | 插件Demo | 论坛 |
  | ------ | -------- | ------ | ------ | ------ |
- | [Github](https://github.com/mengshukeji/Luckysheet)| [在线文档](https://mengshukeji.github.io/LuckysheetDocs/zh/) | [在线Demo](https://mengshukeji.github.io/LuckysheetDemo) / [协同编辑Demo](http://luckysheet.lashuju.com/demo/) | [导入Excel Demo](https://mengshukeji.github.io/LuckyexcelDemo/) | [中文论坛](https://support.qq.com/product/288322) |
+ | [Github](https://github.com/mengshukeji/Luckysheet)| [在线文档](https://dream-num.github.io/LuckysheetDocs/zh/) | [在线Demo](https://dream-num.github.io/LuckysheetDemo) / [协同编辑Demo](http://luckysheet.lashuju.com/demo/) | [导入Excel Demo](https://dream-num.github.io/LuckyexcelDemo/) | [中文论坛](https://support.qq.com/product/288322) |
  | [Gitee镜像](https://gitee.com/mengshukeji/Luckysheet)| [Gitee在线文档](https://mengshukeji.gitee.io/LuckysheetDocs/zh/) | [Gitee在线Demo](https://mengshukeji.gitee.io/luckysheetdemo/) | [Gitee导入Excel Demo](https://mengshukeji.gitee.io/luckyexceldemo/) | [Google Group](https://groups.google.com/g/luckysheet) |
 
 ![演示](/docs/.vuepress/public/img/LuckysheetDemo.gif)
@@ -39,12 +28,14 @@
 | 工程 | 描述 |
 |---------|-------------|
 | [Luckysheet Vue]          | 在vue cli 3项目中使用Luckysheet和Luckyexcel|
+| [Luckysheet Vue3]          | 在vue3, vite项目中使用Luckysheet和Luckyexcel|
 | [Luckysheet React]          | 在React项目中使用Luckysheet |
 | [Luckyexcel Node]          | 在koa2中使用Luckyexcel |
 | [Luckysheet Server]          | Java后台Luckysheet Server |
 | [Luckysheet Server Starter]          | LuckysheetServer 一键docker部署 |
 
 [Luckysheet Vue]: https://gitee.com/mengshukeji/luckysheet-vue
+[Luckysheet Vue3]: https://gitee.com/hjwforever/luckysheet-vue3-vite.git
 [Luckysheet React]: https://gitee.com/mengshukeji/luckysheet-react
 [Luckyexcel Node]: https://gitee.com/mengshukeji/Luckyexcel-node
 [Luckysheet Server]: https://gitee.com/mengshukeji/LuckysheetServer
@@ -60,12 +51,12 @@
 - **表格操作**：筛选，排序
 - **增强功能**：数据透视表，图表，评论，共享编辑，插入图片，矩阵计算，截图，复制到其他格式，EXCEL导入及导出等
 
-更详细的功能列表，请查阅：[特性](https://mengshukeji.github.io/LuckysheetDocs/zh/guide/#%E7%89%B9%E6%80%A7)
+更详细的功能列表，请查阅：[特性](https://dream-num.github.io/LuckysheetDocs/zh/guide/#%E7%89%B9%E6%80%A7)
 
 ## 📖 学习资源
 
 - 新用户优先阅读：[用户指引](https://github.com/mengshukeji/Luckysheet/wiki/User-Guide)
-- 社区提供的教程、学习资料及配套解决方案请查阅：[教程与资源](https://mengshukeji.github.io/LuckysheetDocs/zh/guide/resource.html)
+- 社区提供的教程、学习资料及配套解决方案请查阅：[教程与资源](https://dream-num.github.io/LuckysheetDocs/zh/guide/resource.html)
 
 ## 📜 更新日志
 
@@ -73,7 +64,7 @@
 
 ## ❗️ 问题反馈
 
-在反馈问题之前，请确保仔细阅读 [如何提交问题](https://mengshukeji.github.io/LuckysheetDocs/zh/guide/contribute.html#如何提交问题)。 不符合准则的问题可能会立即被移除。
+在反馈问题之前，请确保仔细阅读 [如何提交问题](https://dream-num.github.io/LuckysheetDocs/zh/guide/contribute.html#如何提交问题)。 不符合准则的问题可能会立即被移除。
 
 ## ✅ 开发计划
 
@@ -81,7 +72,7 @@
 
 ## 💪 贡献
 
-在提交PR之前，请确保仔细阅读 [贡献指南](https://mengshukeji.github.io/LuckysheetDocs/zh/guide/contribute.html)。
+在提交PR之前，请确保仔细阅读 [贡献指南](https://dream-num.github.io/LuckysheetDocs/zh/guide/contribute.html)。
 
 ## 用法
 
@@ -136,28 +127,25 @@ npm run build
 ## 合作项目
 
 - [鲁班h5](https://github.com/ly525/luban-h5)
-- [excelize](https://github.com/360EntSecGroup-Skylar/excelize)
 - [h5-Dooring](https://github.com/MrXujiang/h5-Dooring)
 - [Furion](https://gitee.com/monksoul/Furion)
+- [AFFiNE.PRO](https://github.com/toeverything/AFFiNE)
 
 ## 交流
 
 - [Github 论坛](https://github.com/mengshukeji/Luckysheet/discussions)
-- 添加小编微信,拉你进Luckysheet开发者交流微信群,备注:加群
+- 以下扫码加入官方微信群或者QQ群
 
-  <img src="/docs/.vuepress/public/img/%E5%BE%AE%E4%BF%A1%E4%BA%8C%E7%BB%B4%E7%A0%81.jpg" width = "200" alt="微信群" align="center" />
+|  加小编微信:dushusir2，备注:加群  | QQ群:767964895 |
+|---|---|
+|<img src="https://cdn.jsdelivr.net/gh/mengshukeji/LuckyResources@master/assets/img/wechat/dushusir_wechat.jpg" width="200" />| <img src="https://cdn.jsdelivr.net/gh/mengshukeji/LuckyResources@master/assets/img/wechat/luckysheet_qq_group_2.jpeg" width="200" /> |
 
-或者
-
-- 加入Luckysheet开发者交流QQ群
-  
-  <img src="/docs/.vuepress/public/img/QQ%E7%BE%A4%E4%BA%8C%E7%BB%B4%E7%A0%81.jpg" width = "200" alt="微信群" align="center" />
 
 [英文社群](./README.md)
 
 ## 赞助
 
-Luckysheet是MIT许可的开源项目，其持续稳定的开发离不开这些优秀的 [**支持者**](https://mengshukeji.github.io/LuckysheetDocs/zh/about/sponsor.html#%E8%B5%9E%E5%8A%A9%E8%80%85%E5%88%97%E8%A1%A8)。 如果您想加入他们，请考虑：
+Luckysheet是MIT许可的开源项目，其持续稳定的开发离不开这些优秀的 [**支持者**](https://dream-num.github.io/LuckysheetDocs/zh/about/sponsor.html#%E8%B5%9E%E5%8A%A9%E8%80%85%E5%88%97%E8%A1%A8)。 如果您想加入他们，请考虑：
 
 - [成为Patreon的支持者或赞助商](https://www.patreon.com/mengshukeji)
 - [成为Open Collective的支持者或赞助商](https://opencollective.com/luckysheet)
@@ -165,7 +153,7 @@ Luckysheet是MIT许可的开源项目，其持续稳定的开发离不开这些�
 
 | PayPal |  微信  | 支付宝 |
 |---|---|---|
-| [Paypal Me](https://www.paypal.me/wbfsa) | <img src="https://minio.cnbabylon.com/public/luckysheet/wechat.jpg" width="140" />| <img src="https://minio.cnbabylon.com/public/luckysheet/alipay.jpg" width="130" /> |
+| [Paypal Me](https://www.paypal.me/wbfsa) | <img src="https://cdn.jsdelivr.net/gh/mengshukeji/LuckyResources@master/assets/img/wechat/wechat.jpg" width="200" />| <img src="https://cdn.jsdelivr.net/gh/mengshukeji/LuckyResources@master/assets/img/wechat/alipay.jpg" width="200" /> |
 
 ### Patreon和OpenCollective有什么区别？
 
@@ -195,21 +183,104 @@ Luckysheet是MIT许可的开源项目，其持续稳定的开发离不开这些�
 - Quentin ¥ 20
 - 周宇凡 ¥ 100
 - *超 ¥ 10
+- 维宁 ¥ 100
+- hyy ¥ 20
+- 雨亭寒江月 ¥ 50
+- **功 ¥ 10
+- **光 ¥ 20
+- terrywan ¥ 100
+- 王晓洪 ¥ 10
+- Sun ¥ 10
+- 忧绣 ¥ 100
+- Jasonx ¥ 10
+- 国勇 ¥ 66.6
+- 郎志 ¥ 100
+- 匿名 ¥ 1
+- ni ¥ 100
+- 苏 ¥ 50
+- Mads_chan ¥ 1
+- LK ¥ 100
+- 智连方舟 李汪石 ¥ 168
+- **发 ¥ 260
+- *超 ¥ 10
+- *勇 ¥ 10
+- *腾 ¥ 15
+- 名字好难起 ¥ 20
+- 大山 ¥ 1
+- waiting ¥ 1000
+- **宇 ¥ 10.00
+- 刘小帅的哥哥 ¥ 20.00
+- 宁静致远 ¥ 10.00
+- Eleven ¥ 1.00
+- **帆 ¥ 188
+- henry ¥ 100
+- .波罗 ¥ 50
+- 花落有家 ¥ 50
+- 踏遍南水北山 ¥ 1
+- LC ¥ 5
+- **明 ¥ 8.80
+- *军 ¥ 20
+- 张彪 ¥ 50
+- 企业文档云@肖敏 ¥ 10
+- 匿名 ¥ 50
+- 逍遥行 ¥ 10
+- z.wasaki ¥ 50
+- Make Children ¥ 20
+- Foam ¥ 20
+- 奥特曼( o|o)ノ三 ¥ 50
+- **凯 ¥ 10
+- **兵 ¥ 20
+- **川 ¥ 1
+- 二万 ¥ 50
+- 蔚然成林 ¥ 10
+- 邹杰 ¥ 10
+- 张永强 ¥ 50
+- 鱼得水 ¥ 270
+- Ccther ¥ 1
+- Eric Cheng ¥ 10
+- 佚名 ¥ 1
+- 花叶 ¥ 50
+- GT ¥ 20
+- 菜菜心 ¥ 10
+- fisher ¥ 1
+- JC ¥ 5
+- 佚名 ¥ 20
+- 独孤一剑 ¥ 50
+- mxt ¥ 20
+- 一叶迷山 ¥ 100
+- Jeff ¥ 100
+- 八千多条狗🐶 ¥ 100
+- 晓峰 ¥ 10
+- 戒 ¥ 1
+- 浪里个浪 ¥ 1
+- 回调函数 ¥ 50
+- 赖瓜子 ¥ 5
+- Milo•J ¥ 20
+- 可道云 ¥ 200
+- *程 ¥ 10
+- 来一杯卡布酸奶 ¥ 5
+- 刘久胜 ¥ 100
+- 快意江湖 ¥ 50
+- *新 ¥ 9.9
+- **龙 ¥ 100
 
 ## 贡献者和感谢
 
 ### 核心团队活跃成员
 - [@wbfsa](https://github.com/wbfsa)
-- [@iamxuchen800117](https://github.com/iamxuchen800117)
-- [@wpxp123456](https://github.com/wpxp123456)
+- [@eiji-th](https://github.com/eiji-th)
+- [@fly-95](https://github.com/fly-95)
 - [@tonytonychopper123](https://github.com/tonytonychopper123)
 - [@Dushusir](https://github.com/Dushusir)
+- [@iamxuchen800117](https://github.com/iamxuchen800117)
+- [@wpxp123456](https://github.com/wpxp123456)
 - [@c19c19i](https://weibo.com/u/3884623955)
 - [@zhangchen915](https://github.com/zhangchen915)
 - [@jerry-f](https://github.com/jerry-f)
 - [@flowerField](https://github.com/flowerField)
 
 ### 社区伙伴
+- [@yiwasheng](https://github.com/yiwasheng)
 - [@danielcai1987](https://github.com/danielcai1987)
 - [@qq6690876](https://github.com/qq6690876)
 - [@javahuang](https://github.com/javahuang)

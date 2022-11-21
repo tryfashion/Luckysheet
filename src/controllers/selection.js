@@ -15,6 +15,7 @@ import { getSheetIndex } from '../methods/get';
 import { replaceHtml, getObjType, luckysheetfontformat } from '../utils/util';
 import Store from '../store';
 import locale from '../locale/locale';
+import imageCtrl from './imageCtrl';
 
 const selection = {
     clearcopy: function (e) {
@@ -179,10 +180,24 @@ const selection = {
                 continue;
             }
 
-            cpdata += '<tr>';
+            // 将行高绑定到 <tr> 标签上
+            if (Store.config == null || Store.config['rowlen'] == null || Store.config['rowlen'][r.toString()] == null) {
+                cpdata += '<tr height="19">';
+            } else {
+                cpdata += `<tr height="${Store.config['rowlen'][r.toString()]}">`;
+            }
 
             for (let j = 0; j < colIndexArr.length; j++) {
                 let c = colIndexArr[j];
+
+                if(r == rowIndexArr[0]){
+                    if(Store.config == null || Store.config["columnlen"] == null || Store.config["columnlen"][c.toString()] == null){
+                        colgroup += '<col width="72px"></col>';
+                    }
+                    else {
+                        colgroup += '<col width="'+ Store.config["columnlen"][c.toString()] +'px"></col>';
+                    }
+                }
 
                 if (Store.config["colhidden"] != null && Store.config["colhidden"][c] != null) {
                     continue;
@@ -192,24 +207,6 @@ const selection = {
 
                 if (d[r] != null && d[r][c] != null) {
                     let style = "", span = "";
-
-                    if(r == rowIndexArr[0]){
-                        if(Store.config == null || Store.config["columnlen"] == null || Store.config["columnlen"][c.toString()] == null){
-                            colgroup += '<colgroup width="72px"></colgroup>';
-                        }
-                        else {
-                            colgroup += '<colgroup width="'+ Store.config["columnlen"][c.toString()] +'px"></colgroup>';
-                        }
-                    }
-
-                    if(c == colIndexArr[0]){
-                        if(Store.config == null || Store.config["rowlen"] == null || Store.config["rowlen"][r.toString()] == null){
-                            style += 'height:19px;';
-                        }
-                        else {
-                            style += 'height:'+ Store.config["rowlen"][r.toString()] + 'px;';
-                        }
-                    }
 
                     let reg = /^(w|W)((0?)|(0\.0+))$/;
                     let c_value;
@@ -438,10 +435,40 @@ const selection = {
                     if(c_value == null){
                         c_value = getcellvalue(r, c, d);
                     }
+                    if (c_value == null &&d[r][c] && d[r][c].ct && d[r][c].ct.t == 'inlineStr') {
+                        c_value = d[r][c].ct.s
+                            .map((val) => {
+                                const brDom = $('<br style="mso-data-placement:same-cell;">');
+                                const splitValue = val.v.split('\r\n');
+                                return splitValue
+                                    .map((item) => {
+                                        if (!item) {
+                                            return '';
+                                        }
+                                        const font = $('<font></font>');
+                                        val.fs && font.css('font-size', `${val.fs}pt`); //  字号
+                                        val.bl && font.css('font-weight', 'bold'); //  加粗
+                                        val.it && font.css('font-style', 'italic'); //  斜体
+                                        val.un && font.css('text-decoration', 'underline'); // 下划线
+                                        val.fc && font.css('color', val.fc); //  字体颜色
+                                        if (val.cl) {
+                                            // 判断删除线
+                                            font.append(`<s>${item}</s>`);
+                                        } else {
+                                            font.text(item);
+                                        }
+                                        return font[0].outerHTML;
+                                    })
+                                    .join(brDom[0].outerHTML);
+                            })
+                            .join('');
+                    }
 
                     if(c_value == null){
                         c_value = "";
                     }
+                    
+                    c_value = formula.ltGtSignDeal(c_value)
 
                     column += c_value;
                 }
@@ -481,24 +508,6 @@ const selection = {
 
                     column += "";
 
-                    if(r == rowIndexArr[0]){
-                        if(Store.config == null || Store.config["columnlen"] == null || Store.config["columnlen"][c.toString()] == null){
-                            colgroup += '<colgroup width="72px"></colgroup>';
-                        }
-                        else {
-                            colgroup += '<colgroup width="'+ Store.config["columnlen"][c.toString()] +'px"></colgroup>';
-                        }
-                    }
-
-                    if(c == colIndexArr[0]){
-                        if(Store.config == null || Store.config["rowlen"] == null || Store.config["rowlen"][r.toString()] == null){
-                            style += 'height:19px;';
-                        }
-                        else {
-                            style += 'height:'+ Store.config["rowlen"][r.toString()] + 'px;';
-                        }
-                    }
-
                     column = replaceHtml(column, {"style": style, "span": ""});
                     column += "";
                 }
@@ -509,7 +518,7 @@ const selection = {
 
             cpdata += "</tr>";
         }
-        cpdata = '<table data-type="luckysheet_copy_action_table">' + colgroup + cpdata + '</table>';
+        cpdata = '<table data-type="luckysheet_copy_action_table">' + `<colgroup>${colgroup}</colgroup>` + cpdata + '</table>';
 
         Store.iscopyself = true;
 
@@ -596,6 +605,9 @@ const selection = {
                     _this.pasteHandlerOfCopyPaste(Store.luckysheet_copy_save);
                 }
             }
+            else if(data.indexOf("luckysheet_copy_action_image") > - 1){
+                imageCtrl.pasteImgItem();
+            }
             else if (triggerType != "btn") {
                 _this.pasteHandler(data);
             }
@@ -618,12 +630,16 @@ const selection = {
         if(Store.allowEdit===false){
             return;
         }
+
+        const _locale = locale()
+        const locale_paste = _locale.paste;
+
         if(Store.luckysheet_select_save.length > 1){
             if(isEditMode()){
-                alert("不能对多重选择区域执行此操作，请选择单个区域，然后再试");
+                alert(locale_paste.errorNotAllowMulti);
             }
             else{
-                tooltip.info('<i class="fa fa-exclamation-triangle"></i>提示', "不能对多重选择区域执行此操作，请选择单个区域，然后再试");
+                tooltip.info(`<i class="fa fa-exclamation-triangle"></i>${locale_paste.warning}`, locale_paste.errorNotAllowMulti);
             }
         }
 
@@ -654,10 +670,10 @@ const selection = {
 
             if(has_PartMC){
                 if(isEditMode()){
-                    alert("不能对合并单元格做部分更改");
+                    alert(locale_paste.errorNotAllowMerged);
                 }
                 else{
-                    tooltip.info('<i class="fa fa-exclamation-triangle"></i>提示', "不能对合并单元格做部分更改");
+                    tooltip.info(`<i class="fa fa-exclamation-triangle"></i>${locale_paste.warning}`, locale_paste.errorNotAllowMerged);
                 }
 
                 return;
@@ -795,10 +811,10 @@ const selection = {
 
             if(has_PartMC){
                 if(isEditMode()){
-                    alert("不能对合并单元格做部分更改");
+                    alert(locale_paste.errorNotAllowMerged);
                 }
                 else{
-                    tooltip.info('<i class="fa fa-exclamation-triangle"></i>提示',"不能对合并单元格做部分更改");
+                    tooltip.info(`<i class="fa fa-exclamation-triangle"></i>${locale_paste.warning}`,locale_paste.errorNotAllowMerged);
                 }
                 return;
             }
@@ -872,6 +888,9 @@ const selection = {
             return;
         }
 
+        const _locale = locale()
+        const locale_paste = _locale.paste;
+
         let cfg = $.extend(true, {}, Store.config);
         if(cfg["merge"] == null){
             cfg["merge"] = {};
@@ -904,10 +923,10 @@ const selection = {
 
         if(has_PartMC){
             if(isEditMode()){
-                alert("不能对合并单元格做部分更改");
+                alert(locale_paste.errorNotAllowMerged);
             }
             else{
-                tooltip.info('<i class="fa fa-exclamation-triangle"></i>提示',"不能对合并单元格做部分更改");
+                tooltip.info(`<i class="fa fa-exclamation-triangle"></i>${locale_paste.warning}`,locale_paste.errorNotAllowMerged);
             }
             return;
         }
@@ -1298,6 +1317,10 @@ const selection = {
         if(!checkProtectionLockedRangeList(Store.luckysheet_select_save, Store.currentSheetIndex)){
             return;
         }
+
+        const _locale = locale()
+        const locale_paste = _locale.paste;
+
         let cfg = $.extend(true, {}, Store.config);
         if(cfg["merge"] == null){
             cfg["merge"] = {};
@@ -1382,10 +1405,10 @@ const selection = {
 
         if(has_PartMC){
             if(isEditMode()){
-                alert("不能对合并单元格做部分更改");
+                alert(locale_paste.errorNotAllowMerged);
             }
             else{
-                tooltip.info('<i class="fa fa-exclamation-triangle"></i>提示',"不能对合并单元格做部分更改");
+                tooltip.info(`<i class="fa fa-exclamation-triangle"></i>${locale_paste.warning}`,locale_paste.errorNotAllowMerged);
             }
             return;
         }
@@ -1617,6 +1640,10 @@ const selection = {
         if(!checkProtectionLockedRangeList(Store.luckysheet_select_save, Store.currentSheetIndex)){
             return;
         }
+
+        const _locale = locale()
+        const locale_paste = _locale.paste;
+
         let cfg = $.extend(true, {}, Store.config);
         if(cfg["merge"] == null){
             cfg["merge"] = {};
@@ -1650,10 +1677,10 @@ const selection = {
 
             if(has_PartMC){
                 if(isEditMode()){
-                    alert("不能对合并单元格做部分更改");
+                    alert(locale_paste.errorNotAllowMerged);
                 }
                 else{
-                    tooltip.info('<i class="fa fa-exclamation-triangle"></i>提示',"不能对合并单元格做部分更改");
+                    tooltip.info(`<i class="fa fa-exclamation-triangle"></i>${locale_paste.warning}`,locale_paste.errorNotAllowMerged);
                 }
                 return;
             }
@@ -1765,13 +1792,23 @@ const selection = {
                             }
 
                             if(getObjType(x[c]) == "object"){
-
+                                if(x[c].ct && x[c].ct.t === "inlineStr"){
+                                    delete value["ct"];
+                                }else{
+                                    let format = ['bg','fc','ct','ht','vt','bl','it','cl','un','fs','ff','tb']
+                                    format.forEach(item=>{
+                                        Reflect.deleteProperty(x[c],item);
+                                    })
+                                }
                             }
                             else{
                                 x[c] = {"v": x[c] };
                             }
 
                             x[c] = $.extend(true, x[c], value);
+                            if(x[c].ct && x[c].ct.t === "inlineStr"){  
+                                x[c].ct.s.forEach(item=> item = $.extend(true, item, value))
+                            }
 
                             if(copyHasMC && ("mc" in x[c])){
                                 if(x[c]["mc"].rs != null){
@@ -1854,8 +1891,14 @@ const selection = {
             jfrefreshgrid(d, Store.luckysheet_select_save, allParam);
         }
         else{
+            // 选区格式刷存在超出边界的情况
+             if(maxh >= d.length){
+                maxh = d.length - 1;
+            }
+            cfg = rowlenByRange(d, minh, maxh, cfg); //更新行高
             let allParam = {
                 "cfg": cfg,
+                "RowlChange": true,
                 "cdformat": cdformat,
                 "dataVerification": dataVerification
             }

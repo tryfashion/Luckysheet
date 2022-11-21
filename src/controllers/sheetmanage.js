@@ -73,77 +73,52 @@ const sheetmanage = {
         }
     },
     generateCopySheetName: function(file, name) {
-        let copySheetName = "";
-
         let _locale = locale();
         let locale_info = _locale.info;
+        let copyWord = "(" + locale_info.copy;
+        const copy_i = name.toString().indexOf(copyWord);
 
-        if(name.toString().indexOf("("+locale_info.copy) > -1){
-            let copy_i = name.toString().indexOf("("+locale_info.copy);
-            let name2 = name.toString().substring(0, copy_i) + "("+locale_info.copy;
-            let index = null;
+        if (~copy_i) {
+            name = name.toString().substring(0, copy_i);
+        }
 
-            for(let i = 0; i < file.length; i++){
-                let fileName = file[i].name.toString();
-                let st_i = fileName.indexOf(name2);
+        let index = "";
+        let nameCopy = name + copyWord;
+        const sheetNames = [];
 
-                if(st_i > -1){
-                    let ed_i = fileName.indexOf(")", st_i + name2.length);
-                    let num = fileName.substring(st_i + name2.length, ed_i);
+        for (let i = 0; i < file.length; i++) {
+            let fileName = file[i].name.toString();
+            sheetNames.push(fileName);
+            let st_i = fileName.indexOf(nameCopy);
 
-                    if(isRealNum(num)){
-                        if(index == null || parseInt(num) > index){
-                            index = parseInt(num);
-                        }
+            if(st_i === 0) {
+                index = index || 2;
+                let ed_i = fileName.indexOf(")", st_i + nameCopy.length);
+                let num = fileName.substring(st_i + nameCopy.length, ed_i);
+
+                if (isRealNum(num)) {
+                    if(parseInt(num) >= index){
+                        index = parseInt(num) + 1;
                     }
                 }
             }
-
-            if(index == null){
-                copySheetName = name2 + "2)";
-            }
-            else{
-                index++;
-                copySheetName = name2 + index + ")";
-            }
-        }
-        else{
-            let index = null;
-            let hascopy = false;
-            let name2 = name + "("+locale_info.copy;
-
-            for(let i = 0; i < file.length; i++){
-                let fileName = file[i].name.toString();
-                let st_i = fileName.indexOf(name2);
-
-                if(st_i > -1){
-                    hascopy = true;
-                    let ed_i = fileName.indexOf(")", st_i + name2.length);
-                    let num = fileName.substring(st_i + name2.length, ed_i);
-
-                    if(isRealNum(num)){
-                        if(index == null || parseInt(num) > index){
-                            index = parseInt(num);
-                        }
-                    }
-                }
-            }
-
-            if(hascopy){
-                if(index == null){
-                    copySheetName = name + "("+ locale_info.copy +"2)";
-                }
-                else{
-                    index++;
-                    copySheetName = name + "("+ locale_info.copy +"" + index + ")";
-                }
-            }
-            else{
-                copySheetName = name + "("+ locale_info.copy +")";
-            }
         }
 
-        return copySheetName;
+        let sheetCopyName;
+
+        do {
+            let postfix = copyWord + index + ")";
+
+            const lengthLimit = 31 - postfix.length;
+            sheetCopyName = name;
+            if (sheetCopyName.length > lengthLimit) {
+                sheetCopyName = sheetCopyName.slice(0, lengthLimit - 1) + "…";
+            }
+
+            sheetCopyName = sheetCopyName + postfix;
+        } while (~sheetNames.indexOf(sheetCopyName) && (index = (index || 1) + 1))
+
+        return sheetCopyName;
     },
     getSheetByIndex: function(index) {
         let _this = this;
@@ -228,6 +203,10 @@ const sheetmanage = {
             // alert("非编辑模式下不允许该操作！");
             return;
         }
+        // 钩子 sheetCreateBefore
+        if(!method.createHookFunction('sheetCreateBefore')){
+            return;
+        }
 
         let _this = this;
 
@@ -271,10 +250,16 @@ const sheetmanage = {
         }
 
         _this.changeSheetExec(index, isPivotTable, true);
+
+        // 钩子 sheetCreateAfter 不应该在这里 应在绘制完成后 因此在 changeSheet 实现
     },
-    setSheetHide: function(index) {
+    setSheetHide: function(index, isDelete) {
         let _this = this;
         let currentIdx = _this.getSheetIndex(index);
+        // 钩子 sheetHideBefore
+        if(!isDelete && !method.createHookFunction('sheetHideBefore', {sheet: Store.luckysheetfile[currentIdx]})){
+            return;
+        }
         Store.luckysheetfile[currentIdx].hide = 1;
         
         let luckysheetcurrentSheetitem = $("#luckysheet-sheets-item" + index);
@@ -309,16 +294,27 @@ const sheetmanage = {
         $("#luckysheet-sheets-item" + indicator).addClass("luckysheet-sheets-item-active");
         
         _this.changeSheetExec(indicator);
+        _this.locationSheet();
 
         server.saveParam("sh", luckysheetcurrentSheetitem.data("index"), 1, { "op": "hide", "cur": indicator });
+        // 钩子 sheetHideAfter
+        if (!isDelete) {
+            method.createHookFunction('sheetHideAfter', {sheet: Store.luckysheetfile[currentIdx]});
+        }
     },
     setSheetShow: function(index) {
         let _this = this;
-
-        Store.luckysheetfile[_this.getSheetIndex(index)].hide = 0;
+        const file = Store.luckysheetfile[_this.getSheetIndex(index)]
+        // 钩子 sheetShowBefore
+        if(!method.createHookFunction('sheetShowBefore', {sheet: file})){
+            return;
+        }
+        file.hide = 0;
         _this.changeSheetExec(index);
 
         server.saveParam("sh", index, 0, {"op": "show", "cur": null});
+        // 钩子 sheetShowAfter
+        method.createHookFunction('sheetShowAfter', {sheet: file});
     },
     sheetMaxIndex: 0,
     ordersheet: function(property) {
@@ -418,6 +414,7 @@ const sheetmanage = {
 
         _this.locationSheet();
     },
+    // *控制sheet栏的左右滚动按钮是否显示
     locationSheet: function() {
         let $c = $("#luckysheet-sheet-container-c"), winW = $("#"+Store.container).width();
         let $cursheet = $("#luckysheet-sheet-container-c > div.luckysheet-sheets-item-active").eq(0);
@@ -435,13 +432,16 @@ const sheetmanage = {
         setTimeout(function(){
             $c.scrollLeft(scrollLeftpx - 10);
 
-            if (c_width >= winW * 0.7) {
-                if(luckysheetConfigsetting.showsheetbarConfig.sheet){
+            if (luckysheetConfigsetting.showsheetbarConfig.sheet){
+                if (c_width >= winW * 0.7) {
                     $("#luckysheet-sheet-area .luckysheet-sheets-scroll").css("display", "inline-block");
                     $("#luckysheet-sheet-container .docs-sheet-fade-left").show();
+                } else {
+                    $("#luckysheet-sheet-area .luckysheet-sheets-scroll").css("display", "none");
+                    $("#luckysheet-sheet-container .docs-sheet-fade-left").hide();
                 }
-                
             }
+
         }, 1)
     },
     copySheet: function(copyindex, e) {
@@ -460,6 +460,14 @@ const sheetmanage = {
         copyjson.order = order;
         copyjson.index = index;
         copyjson.name = _this.generateCopySheetName(Store.luckysheetfile, copyjson.name);
+
+        // 钩子 sheetCreateBefore
+        if(!method.createHookFunction('sheetCopyBefore', {
+            targetSheet: Store.luckysheetfile[copyarrindex],
+            copySheet: copyjson
+        })){
+            return;
+        }
         
         let colorset = '';
         if(copyjson.color != null){
@@ -478,7 +486,7 @@ const sheetmanage = {
 
         server.saveParam("shc", index, { "copyindex": copyindex, "name": copyjson.name });
 
-        _this.changeSheetExec(index);
+        _this.changeSheetExec(index, undefined, undefined, true);
         _this.reOrderAllSheet();
 
         if (Store.clearjfundo) {
@@ -560,7 +568,15 @@ const sheetmanage = {
         }
 
         let arrIndex = _this.getSheetIndex(index);
-        _this.setSheetHide(index);
+
+        const file = Store.luckysheetfile[arrIndex];
+
+        // 钩子 sheetDeleteBefore
+        if(!method.createHookFunction('sheetDeleteBefore', { sheet: file })){
+            return;
+        }
+
+        _this.setSheetHide(index, true);
 
         $("#luckysheet-sheets-item" + index).remove();
         $("#luckysheet-datavisual-selection-set-" + index).remove();
@@ -574,6 +590,8 @@ const sheetmanage = {
             removedsheet[0].type = "deleteSheet";
             Store.jfredo.push(removedsheet[0]);
         }
+        // 钩子 sheetDeleteAfter
+        method.createHookFunction('sheetDeleteAfter', { sheet: file });
     },
     nulldata: null,
     getGridData: function(d) {
@@ -1131,7 +1149,7 @@ const sheetmanage = {
             }
         }
     },
-    changeSheet: function(index, isPivotInitial, isNewSheet) {
+    changeSheet: function(index, isPivotInitial, isNewSheet, isCopySheet) {
         if(isEditMode()){
             // alert("非编辑模式下不允许该操作！");
             return;
@@ -1147,6 +1165,15 @@ const sheetmanage = {
             $("#luckysheet-cell-main #luckysheet-multipleRange-show").empty();
             server.multipleIndex = 0;
         }
+        let file = Store.luckysheetfile[_this.getSheetIndex(index)]
+        // 钩子 sheetCreateAfter
+        if (isNewSheet) {
+            method.createHookFunction('sheetCreateAfter', { sheet: file }); 
+        }
+        // 钩子 sheetCopyAfter
+        if (isCopySheet) {
+            method.createHookFunction('sheetCopyAfter', { sheet: file }); 
+        }
         
         // 钩子函数
         method.createHookFunction('sheetActivate', index, isPivotInitial, isNewSheet);
@@ -1157,7 +1184,6 @@ const sheetmanage = {
         _this.storeSheetParamALL();
         _this.setCurSheet(index);
 
-        let file = Store.luckysheetfile[_this.getSheetIndex(index)]
   
         if (!!file.isPivotTable) {
             Store.luckysheetcurrentisPivotTable = true;
@@ -1195,7 +1221,10 @@ const sheetmanage = {
                 file["data"] = data;
                 file["load"] = "1";
 
-                _this.loadOtherFile(file);
+                // *这里不应该调用loadOtherFile去加载其余页面的数据,
+                // *因为loadOtherFile里判断后会调用buildGridData把其余的sheet的数据设置为空的二维数组,即使那个sheet在服务端存在数据.
+                // *这就导致一个数据丢失问题.
+                // _this.loadOtherFile(file);
 
                 // let sheetindexset = _this.checkLoadSheetIndex(file);
                 // let sheetindex = [];
@@ -1467,7 +1496,7 @@ const sheetmanage = {
 
         return null;
     },
-    changeSheetExec: function(index, isPivotInitial, isNewSheet) {
+    changeSheetExec: function(index, isPivotInitial, isNewSheet, isCopySheet) {
         
         let $sheet = $("#luckysheet-sheets-item" + index);
 
@@ -1476,7 +1505,7 @@ const sheetmanage = {
         $sheet.addClass("luckysheet-sheets-item-active").show();
 
         cleargridelement();
-        this.changeSheet(index, isPivotInitial, isNewSheet);
+        this.changeSheet(index, isPivotInitial, isNewSheet, isCopySheet);
         
         $("#luckysheet-sheet-list, #luckysheet-rightclick-sheet-menu").hide();
 
@@ -1487,14 +1516,12 @@ const sheetmanage = {
         this.sheetBarShowAndHide(index);
     },
     sheetArrowShowAndHide(){
-        let containerW = $("#luckysheet-sheet-container").width();
+        const $wrap = $('#luckysheet-sheet-container-c');
+        if (!$wrap.length) return;
+        var sw = $wrap[0].scrollWidth;
+        var w = Math.ceil($wrap.width());
 
-        let c_width = 0;
-        $("#luckysheet-sheet-container-c > div.luckysheet-sheets-item:visible").each(function(){
-            c_width += $(this).outerWidth();
-        });
-
-        if (c_width >= containerW) {
+        if (sw > w) {
             if(luckysheetConfigsetting.showsheetbarConfig.sheet){
                 $("#luckysheet-sheet-area .luckysheet-sheets-scroll").css("display", "inline-block");
                 $("#luckysheet-sheet-container .docs-sheet-fade-left").show();
@@ -1506,6 +1533,7 @@ const sheetmanage = {
             $("#luckysheet-sheet-container .docs-sheet-fade-left").hide();
         }
     },
+    // *显示sheet栏左右的灰色
     sheetBarShowAndHide(index){
         let $c = $("#luckysheet-sheet-container-c");
 

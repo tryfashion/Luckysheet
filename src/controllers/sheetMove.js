@@ -441,13 +441,16 @@ function luckysheetMoveHighlightCell(postion, index, type, isScroll) {
         else{
             row = Store.visibledatarow[moveX]; 
             row_pre = moveX - 1 == -1 ? 0 : Store.visibledatarow[moveX - 1];
-            row_index = moveX;
-            row_index_ed = moveX;
+            // row_index = moveX;
+            // row_index_ed = moveX;
 
             col = Store.visibledatacolumn[moveY]; 
             col_pre = moveY - 1 == -1 ? 0 : Store.visibledatacolumn[moveY - 1];
-            col_index = moveY;
-            col_index_ed = moveY;
+            // col_index = moveY;
+            // col_index_ed = moveY;
+            
+            row_index = row_index_ed = curR;
+            col_index = col_index_ed = curC;
         }
 
         last["row"] = [row_index, row_index_ed];
@@ -1660,7 +1663,7 @@ function getRowMerge(rIndex, c1, c2){
             }
 
             if(rowHasMerge(str - 1, c1, c2) && str > r1){
-                r = str - 1;
+                r = str;
             }
             else{
                 break;
@@ -1687,7 +1690,7 @@ function getRowMerge(rIndex, c1, c2){
             }
 
             if(rowHasMerge(end + 1, c1, c2) && end < r2){
-                r = end + 1;
+                r = end;
             }
             else{
                 break;
@@ -1719,7 +1722,7 @@ function getColMerge(cIndex, r1, r2){
             }
 
             if(colHasMerge(str - 1, r1, r2) && str > c1){
-                c = str - 1;
+                c = str;
             }
             else{
                 break;
@@ -1746,7 +1749,7 @@ function getColMerge(cIndex, r1, r2){
             }
 
             if(colHasMerge(end + 1, r1, r2) && end < c2){
-                c = end + 1;
+                c = end;
             }
             else{
                 break;

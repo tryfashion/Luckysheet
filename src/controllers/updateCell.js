@@ -101,7 +101,7 @@ export function luckysheetupdateCell(row_index1, col_index1, d, cover, isnotfocu
     $("#luckysheet-input-box").removeAttr("style").css({ 
         "background-color": "rgb(255, 255, 255)", 
         "padding": "0px 2px", 
-        "font-size": "13px", 
+        "font-size": `${Store.defaultFontSize}pt`,
         "right": "auto", 
         "overflow-y": "auto",
         "box-sizing": "initial",
@@ -176,7 +176,7 @@ export function luckysheetupdateCell(row_index1, col_index1, d, cover, isnotfocu
             else{
                 value = valueShowEs(row_index, col_index, d);
                 if(cell.qp=="1"){
-                    value = "'" + value;
+                    value = value ? ("" + value) : value;
                 }
             }
         }
@@ -214,14 +214,15 @@ export function luckysheetupdateCell(row_index1, col_index1, d, cover, isnotfocu
         input_postition["min-width"] = input_postition["max-width"];
     }
    
-    if((value == null || value.toString() == "") && !cover){
-        value = "<br/>";
-    }
-    
+    // if((value == null || value.toString() == "") && !cover){
+    //     value = "<br/>";
+    // }
+    value = formula.xssDeal(value);
     if(!checkProtectionCellHidden(row_index, col_index, Store.currentSheetIndex) && value.length>0 && value.substr(0, 63)=='<span dir="auto" class="luckysheet-formula-text-color">=</span>'){
         $("#luckysheet-rich-text-editor").html("");
     }
     else{
+        value = formula.ltGtSignDeal(value);
         $("#luckysheet-rich-text-editor").html(value);
         if (!isnotfocus) {
             luckysheetRangeLast($("#luckysheet-rich-text-editor")[0]);

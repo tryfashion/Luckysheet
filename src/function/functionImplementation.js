@@ -1,4 +1,5 @@
-import { luckysheet_getcelldata, luckysheet_parseData, luckysheet_getValue } from './func';
+import luckysheetConfigsetting from '../controllers/luckysheetConfigsetting';
+import { luckysheet_getcelldata, luckysheet_parseData, luckysheet_getValue, luckysheet_calcADPMM } from './func';
 import { inverse } from './matrix_methods';
 import { getSheetIndex, getluckysheetfile,getRangetxt } from '../methods/get';
 import menuButton from '../controllers/menuButton';
@@ -3336,7 +3337,7 @@ const functionImplementation = {
                         }
                         else{
                             if (typeof value !== 'string') {
-                                if (new Function("return " + value + criter)()) {  
+                                if (new Function("return " + value + criter)()) {
                                     matches++;
                                 }
                             }
@@ -12450,9 +12451,8 @@ const functionImplementation = {
         }
 
         try {
-            luckysheet_getValue(arguments);
             for (var i = 0; i < arguments.length-1; i++){
-                arguments[i] = moment.fromOADate(arguments[i]).format("l");
+                arguments[i] = func_methods.getCellDate(arguments[i]);
                 if(!isdatetime(arguments[i])){
                     return formula.error.v;
                 }
@@ -12485,8 +12485,9 @@ const functionImplementation = {
                     result = (startM <= endM) ?  endM - startM : endM + 12 - startM;
                     break;
                 case "YD":case "yd":
-                    var startM = genarate(startDate.format('MM-DD'))[2];
-                    var endM = genarate(endDate.format('MM-DD'))[2];
+                    const format = `${endDate.$y}-MM-DD`;
+                    var startM = genarate(startDate.format(format))[2];
+                    var endM = genarate(endDate.format(format))[2];
 
                     result = (startM <= endM) ? endM - startM : endM + 365 - startM;
                     break;
@@ -27583,6 +27584,40 @@ const functionImplementation = {
         catch (e) {
             var err = e;
             //计算错误检测
+            err = formula.errorInfo(err);
+            return [formula.error.v, err];
+        }
+    },
+    "REMOTE": function() {
+        if (arguments.length < this.m[0] || arguments.length > this.m[1]) {
+            return formula.error.na;
+        }
+
+        try {
+            const cellRow = window.luckysheetCurrentRow;
+            const cellColumn = window.luckysheetCurrentColumn;
+            const cellFunction = window.luckysheetCurrentFunction;
+
+            const remoteFunction = func_methods.getFirstValue(arguments[0]);
+            if(valueIsError(remoteFunction)){
+                return remoteFunction;
+            }
+
+            luckysheetConfigsetting.remoteFunction(remoteFunction, data => {
+                const flowData = editor.deepCopyFlowData(Store.flowdata);
+                formula.execFunctionGroup(cellRow, cellColumn, data);
+                flowData[cellRow][cellColumn] = {
+                    "v": data,
+                    "f": cellFunction
+                };
+                jfrefreshgrid(flowData, [{"row": [cellRow, cellRow], "column": [cellColumn, cellColumn]}]);
+            });
+
+            return "Loading...";
+        }
+        catch (e) {
+            console.log(e);
+            var err = e;
             err = formula.errorInfo(err);
             return [formula.error.v, err];
         }

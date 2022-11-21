@@ -58,6 +58,7 @@ function jfrefreshgrid(data, range, allParam, isRunExecFunction = true, isRefres
     let cdformat = allParam["cdformat"];  //条件格式
     let dataVerification = allParam["dataVerification"];  //数据验证
     let dynamicArray = allParam["dynamicArray"];  //动态数组
+    let hyperlink = allParam["hyperlink"];
 
     let file = Store.luckysheetfile[getSheetIndex(Store.currentSheetIndex)];
 
@@ -110,6 +111,8 @@ function jfrefreshgrid(data, range, allParam, isRunExecFunction = true, isRefres
             "curDataVerification": curDataVerification,
             "dynamicArray": $.extend(true, [], file["dynamicArray"]),
             "curDynamicArray": curDynamicArray,
+            "hyperlink": hyperlink && $.extend(true, {}, file.hyperlink),
+            "curHyperlink": hyperlink,
             "range": range,
             "dataRange": [...file.luckysheet_select_save]// 保留操作时的选区
         });
@@ -120,8 +123,8 @@ function jfrefreshgrid(data, range, allParam, isRunExecFunction = true, isRefres
     editor.webWorkerFlowDataCache(Store.flowdata);//worker存数据
     file.data = Store.flowdata;
 
-    //config, null or empty object are not processed
-    if(cfg != null  && Object.keys(cfg).length !== 0){
+    // 必须要处理，可能之前的config为空，则也需要清空
+    if(cfg != null){
         Store.config = cfg;
         file.config = Store.config;
 
@@ -151,6 +154,12 @@ function jfrefreshgrid(data, range, allParam, isRunExecFunction = true, isRefres
         file["dynamicArray"] = dynamicArray;
 
         server.saveParam("all", Store.currentSheetIndex, dynamicArray, { "k": "dynamicArray" });
+    }
+
+    if(hyperlink != null){
+        file["hyperlink"] = hyperlink;
+        hyperlinkCtrl.hyperlink = hyperlink;
+        server.saveParam("all", Store.currentSheetIndex, hyperlink, { "k": "hyperlink" });
     }
 
     //更新数据的范围
@@ -887,7 +896,7 @@ function jfrefreshgrid_pastcut(source, target, RowlChange){
 
             Store.visibledatarow.push(Store.rh_height);//行的临时长度分布
         }
-        Store.rh_height += 110;
+        Store.rh_height += 80;
         // sheetmanage.showSheet();
 
         if(Store.currentSheetIndex == source["sheetIndex"]){
@@ -942,6 +951,13 @@ function jfrefreshgrid_pastcut(source, target, RowlChange){
     formula.execFunctionExist.reverse();
     formula.execFunctionGroup(null, null, null, null, target["curData"]);
     formula.execFunctionGlobalData = null;
+
+    let index = getSheetIndex(Store.currentSheetIndex);
+    let file = Store.luckysheetfile[index];
+    file.scrollTop  = $("#luckysheet-cell-main").scrollTop();
+    file.scrollLeft = $("#luckysheet-cell-main").scrollLeft()
+    
+    sheetmanage.showSheet();
 
     refreshCanvasTimeOut = setTimeout(function () {
         luckysheetrefreshgrid();
